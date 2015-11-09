@@ -12,6 +12,7 @@ MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY')
 MAILGUN_API_DOMAIN = os.environ.get('MAILGUN_API_DOMAIN')
 FOURSQUARE_CLIENT_ID = os.environ.get('FOURSQUARE_CLIENT_ID')
 FOURSQUARE_CLIENT_SECRET = os.environ.get('FOURSQUARE_CLIENT_SECRET')
+APPLICATION_ROOT = os.environ.get('APPLICATION_ROOT')
 
 
 # create our little application :)
