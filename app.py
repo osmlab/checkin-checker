@@ -38,8 +38,7 @@ def send_email(to, subject, body):
 
 @application.route('/')
 def index():
-    callback_url = url_for('foursquare_auth_callback', _external=True, _scheme='https')
-    callback_url = urllib.quote_plus(callback_url)
+    callback_url = 'https://openstreetmap.us/checkins/auth/callback/foursquare'
     return render_template('index.html', callback_url=callback_url)
 
 
