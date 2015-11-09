@@ -15,8 +15,8 @@ FOURSQUARE_CLIENT_SECRET = os.environ.get('FOURSQUARE_CLIENT_SECRET')
 
 
 # create our little application :)
-app = Flask(__name__)
-app.config.from_object(__name__)
+application = Flask(__name__)
+application.config.from_object(__name__)
 
 
 def send_email(to, subject, body):
@@ -35,14 +35,14 @@ def send_email(to, subject, body):
     print response.json()
 
 
-@app.route('/')
+@application.route('/')
 def index():
     callback_url = url_for('foursquare_auth_callback', _external=True, _scheme='https')
     callback_url = urllib.quote_plus(callback_url)
     return render_template('index.html', callback_url=callback_url)
 
 
-@app.route('/auth/callback/foursquare')
+@application.route('/auth/callback/foursquare')
 def foursquare_auth_callback():
     code = request.args.get('code')
     if code:
@@ -83,7 +83,7 @@ def foursquare_auth_callback():
     return render_template('auth_callback_foursquare.html')
 
 
-@app.route('/hooks/foursquare', methods=['POST'])
+@application.route('/hooks/foursquare', methods=['POST'])
 def foursquare_webhook():
     checkin = json.loads(request.form.get('checkin'))
     user = json.loads(request.form.get('user'))
@@ -140,4 +140,4 @@ You checked in at {venue_name} on Foursquare but that location doesn't seem to e
     return 'OK'
 
 if __name__ == '__main__':
-    app.run()
+    application.run()
