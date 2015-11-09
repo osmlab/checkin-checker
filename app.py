@@ -53,7 +53,7 @@ def foursquare_auth_callback():
                 client_id=FOURSQUARE_CLIENT_ID,
                 client_secret=FOURSQUARE_CLIENT_SECRET,
                 grant_type='authorization_code',
-                redirect_uri=url_for('foursquare_auth_callback', _external=True, _scheme='https'),
+                redirect_uri='https://openstreetmap.us/checkins/auth/callback/foursquare',
                 code=code,
             )
         )
