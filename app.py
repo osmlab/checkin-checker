@@ -1,8 +1,7 @@
 import editdistance
 import os
 import requests
-import urllib
-from flask import Flask, request, render_template, json, url_for
+from flask import Flask, request, render_template, json
 
 # configuration
 # DEBUG = True
@@ -27,7 +26,6 @@ def send_email(to, subject, body):
         data={
             "from": "Checkin Checker <ian@openstreetmap.us>",
             "to": to,
-            "bcc": "ian@openstreetmap.us",
             "subject": subject,
             "text": body,
         }
@@ -125,7 +123,8 @@ def foursquare_webhook():
 
 You checked in at {venue_name} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it near http://osm.org/?zoom=17&mlat={mlat}&mlon={mlon}!
 
--Checkin Checker""".format(
+-Checkin Checker
+(Reply to this e-mail for feedback/questions. Uninstall at https://foursquare.com/settings/connections to stop these e-mails.)""".format(
             name=user.get('firstName', 'Friend'),
             venue_name=venue_name,
             mlat=round(venue.get('location').get('lat'), 6),
