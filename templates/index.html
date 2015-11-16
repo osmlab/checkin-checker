@@ -1,7 +1,12 @@
-<h1>Checkin Checker</h1>
+<link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/journal/bootstrap.min.css" rel="stylesheet" integrity="sha256-bPSyJP9+ovy9/YbIwvZyX6r2M4PkiF01vt0zuDLUEzs= sha512-F4ep7hh9V7i7UvRF56Vq8VgjFIFGRVaE2y5UZ2FtIcMWoLFiDxTmHgnDm1XDZGcc6Vtp+kwtL0Kd3VA8uBMK9g==" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha256-Sk3nkD6mLTMOF0EOpNtsIry+s1CsaqQC1rVLTAy+0yc= sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
 
-<hr/>
+<div class="container-fluid">
+  <h1>Checkin Checker</h1>
 
-<p>This service will receive your checkins, query the area around them in OpenStreetMap, and notify you if the place you checked in at is not in OpenStreetMap. It's up to you to add the location to OpenStreetMap.</p>
+  <hr/>
 
-<a href="https://foursquare.com/oauth2/authenticate?client_id=OHSEXPMWUV5F5YXOLYG1QJ21BBFVVEXXQ1WXYGLZPRJ5W5VR&response_type=code&redirect_uri={{ callback_url | urlencode }}">Connect with Foursquare</a>
+  <p>This service will receive your checkins, query the area around them in OpenStreetMap, and notify you if the place you checked in at is not in OpenStreetMap. It's up to you to add the location to OpenStreetMap.</p>
+
+  <a class="btn btn-primary" href="https://foursquare.com/oauth2/authenticate?client_id=OHSEXPMWUV5F5YXOLYG1QJ21BBFVVEXXQ1WXYGLZPRJ5W5VR&response_type=code&redirect_uri={{ callback_url | urlencode }}">Connect with Foursquare</a>
+</div>
