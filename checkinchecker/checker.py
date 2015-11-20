@@ -47,7 +47,7 @@ def foursquare_checkin_has_matches(checkin, user):
     if not potential_matches:
         user_email = user.get('contact', {}).get('email')
         logger.info("No matches! Send an e-mail.")
-        message = """Hi {name},
+        message = u"""Hi {name},
 
 You checked in at {venue_name} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it near http://osm.org/?zoom=17&mlat={mlat}&mlon={mlon}!
 
