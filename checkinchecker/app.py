@@ -1,10 +1,11 @@
+import logging
 import os
 import requests
 from flask import Flask, request, render_template, json
 from rq import Queue
 
 from worker import conn
-from util import send_email
+from util import send_email, setup_loghandlers
 from checker import foursquare_checkin_has_matches
 
 
@@ -22,6 +23,8 @@ APPLICATION_ROOT = os.environ.get('APPLICATION_ROOT')
 application = Flask(__name__)
 application.config.from_object(__name__)
 q = Queue(connection=conn)
+logger = logging.getLogger('checker')
+setup_loghandlers()
 
 
 @application.route('/')
@@ -34,7 +37,7 @@ def index():
 def foursquare_auth_callback():
     code = request.args.get('code')
     if code:
-        application.logger.info("Exchanging code for access token")
+        logger.info("Exchanging code for access token")
         response = requests.get(
             "https://foursquare.com/oauth2/access_token",
             params=dict(
@@ -47,7 +50,7 @@ def foursquare_auth_callback():
         )
         response.raise_for_status()
         access_token = response.json().get('access_token')
-        application.logger.info("Got access token: {}".format(access_token))
+        logger.info("Got access token: {}".format(access_token))
 
         response = requests.get(
             "https://api.foursquare.com/v2/users/self",
@@ -76,6 +79,7 @@ def foursquare_webhook():
     checkin = json.loads(request.form.get('checkin'))
     user = json.loads(request.form.get('user'))
     q.enqueue(foursquare_checkin_has_matches, checkin, user)
+    logger.info('Enqueued a webhook from a user')
     return 'OK'
 
 if __name__ == '__main__':

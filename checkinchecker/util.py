@@ -1,5 +1,17 @@
-import requests
+import logging
 import os
+import requests
+
+
+def setup_loghandlers(level='INFO'):
+    logger = logging.getLogger('checker')
+    if not logger.handlers:
+        logger.setLevel(level)
+        formatter = logging.Formatter(fmt='%(asctime)s %(message)s',
+                                      datefmt='%H:%M:%S')
+        handler = logging.StreamHandler()
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
 
 
 def send_email(to, subject, body):

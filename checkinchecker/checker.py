@@ -4,7 +4,7 @@ import logging
 
 from util import send_email
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('checker')
 
 
 def foursquare_checkin_has_matches(checkin, user):
