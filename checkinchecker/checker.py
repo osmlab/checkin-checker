@@ -4,7 +4,7 @@ import logging
 
 from util import send_email
 
-log = logging.getLogger('checker')
+logger = logging.getLogger(__name__)
 
 
 def foursquare_checkin_has_matches(checkin, user):
@@ -14,7 +14,7 @@ def foursquare_checkin_has_matches(checkin, user):
     categories = venue.get('categories')
     for category in categories:
         if category.get('name').endswith('(private)'):
-            log.info("Skipping checkin at private venue")
+            logger.info("Skipping checkin at private venue")
             return
 
     query = '[out:json][timeout:5];(' \
@@ -46,7 +46,7 @@ def foursquare_checkin_has_matches(checkin, user):
 
     if not potential_matches:
         user_email = user.get('contact', {}).get('email')
-        log.info("No matches! Send an e-mail.")
+        logger.info("No matches! Send an e-mail.")
         message = """Hi {name},
 
 You checked in at {venue_name} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it near http://osm.org/?zoom=17&mlat={mlat}&mlon={mlon}!
@@ -62,4 +62,4 @@ You checked in at {venue_name} on Foursquare but that location doesn't seem to e
         if user_email:
             send_email(user_email, "Your Recent Foursquare Checkin Isn't On OpenStreetMap", message)
     else:
-        log.info("Matches: {}".format(', '.join(map(lambda i: i.get('tags').get('name'), potential_matches))))
+        logger.info("Matches: {}".format(', '.join(map(lambda i: i.get('tags').get('name'), potential_matches))))
