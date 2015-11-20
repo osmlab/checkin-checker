@@ -89,6 +89,12 @@ def foursquare_webhook():
     venue = checkin.get('venue')
     venue_name = venue.get('name')
 
+    categories = venue.get('categories')
+    for category in categories:
+        if category.get('name').endswith('(private)'):
+            # Skip checkins to private places
+            return 'OK'
+
     query = '[out:json][timeout:5];(' \
         'node["name"](around:100.0,{lat},{lng});' \
         'way["name"](around:100.0,{lat},{lng});' \
