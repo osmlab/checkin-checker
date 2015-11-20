@@ -1,7 +1,12 @@
-import editdistance
 import os
 import requests
 from flask import Flask, request, render_template, json
+from rq import Queue
+
+from worker import conn
+from util import send_email
+from checker import foursquare_checkin_has_matches
+
 
 # configuration
 # DEBUG = True
@@ -14,24 +19,9 @@ FOURSQUARE_CLIENT_SECRET = os.environ.get('FOURSQUARE_CLIENT_SECRET')
 APPLICATION_ROOT = os.environ.get('APPLICATION_ROOT')
 
 
-# create our little application :)
 application = Flask(__name__)
 application.config.from_object(__name__)
-
-
-def send_email(to, subject, body):
-    response = requests.post(
-        'https://api.mailgun.net/v3/{}/messages'.format(MAILGUN_API_DOMAIN),
-        auth=('api', MAILGUN_API_KEY),
-        data={
-            "from": "Checkin Checker <ian@openstreetmap.us>",
-            "to": to,
-            "subject": subject,
-            "text": body,
-        }
-    )
-    response.raise_for_status()
-    print response.json()
+q = Queue(connection=conn)
 
 
 @application.route('/')
@@ -85,63 +75,7 @@ def foursquare_auth_callback():
 def foursquare_webhook():
     checkin = json.loads(request.form.get('checkin'))
     user = json.loads(request.form.get('user'))
-
-    venue = checkin.get('venue')
-    venue_name = venue.get('name')
-
-    categories = venue.get('categories')
-    for category in categories:
-        if category.get('name').endswith('(private)'):
-            # Skip checkins to private places
-            return 'OK'
-
-    query = '[out:json][timeout:5];(' \
-        'node["name"](around:100.0,{lat},{lng});' \
-        'way["name"](around:100.0,{lat},{lng});' \
-        'relation["name"](around:100.0,{lat},{lng});' \
-        ');out body;'.format(
-            lat=venue.get('location').get('lat'),
-            lng=venue.get('location').get('lng'),
-        )
-
-    response = requests.post('https://overpass-api.de/api/interpreter', data=query)
-
-    response.raise_for_status()
-
-    osm = response.json()
-    elements = osm.get('elements')
-
-    def is_match(osm_obj):
-        element_name = osm_obj.get('tags').get('name')
-        distance = editdistance.eval(venue_name, element_name)
-        edit_pct = (float(distance) / max(len(venue_name), len(element_name))) * 100.0
-
-        # print "{} -- {} ({:0.1f}%)".format(venue_name, element_name, edit_pct)
-
-        return edit_pct < 50
-
-    potential_matches = filter(is_match, elements)
-
-    if not potential_matches:
-        user_email = user.get('contact', {}).get('email')
-        print "No matches! Send an e-mail."
-        message = """Hi {name},
-
-You checked in at {venue_name} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it near http://osm.org/?zoom=17&mlat={mlat}&mlon={mlon}!
-
--Checkin Checker
-(Reply to this e-mail for feedback/questions. Uninstall at https://foursquare.com/settings/connections to stop these e-mails.)""".format(
-            name=user.get('firstName', 'Friend'),
-            venue_name=venue_name,
-            mlat=round(venue.get('location').get('lat'), 6),
-            mlon=round(venue.get('location').get('lng'), 6),
-            email=user_email,
-        )
-        if user_email:
-            send_email(user_email, "Your Recent Foursquare Checkin Isn't On OpenStreetMap", message)
-    else:
-        print "Matches: {}".format(', '.join(map(lambda i: i.get('tags').get('name'), potential_matches)))
-
+    q.enqueue(foursquare_checkin_has_matches, checkin, user)
     return 'OK'
 
 if __name__ == '__main__':
