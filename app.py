@@ -71,7 +71,7 @@ def foursquare_auth_callback():
         email = user_data.get('contact', {}).get('email')
         if email:
             message = "Hi {name},\n\n" \
-                "You just connected your Foursquare account to Checkin Checker. " \
+                "You just connected your Foursquare account to Checkin Checker at https://openstreetmap.us/checkins. " \
                 "If you ever want to disconnet, go to https://foursquare.com/settings/connections and remove the Checkin Checker app.\n\n" \
                 "Checkin Checker".format(
                     name=user_data.get('firstName'),
