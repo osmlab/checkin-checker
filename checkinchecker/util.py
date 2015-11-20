@@ -1,6 +1,7 @@
 import requests
 import os
 
+
 def send_email(to, subject, body):
     response = requests.post(
         'https://api.mailgun.net/v3/{}/messages'.format(os.environ.get('MAILGUN_API_DOMAIN')),
