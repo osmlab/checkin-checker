@@ -1,1 +1,1 @@
-web: gunicorn app --log-file -
+web: gunicorn checkinchecker.app --log-file -
