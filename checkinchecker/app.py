@@ -34,7 +34,7 @@ def index():
 def foursquare_auth_callback():
     code = request.args.get('code')
     if code:
-        print "Exchanging code for access token"
+        application.logger.info("Exchanging code for access token")
         response = requests.get(
             "https://foursquare.com/oauth2/access_token",
             params=dict(
@@ -47,7 +47,7 @@ def foursquare_auth_callback():
         )
         response.raise_for_status()
         access_token = response.json().get('access_token')
-        print "Got access token: {}".format(access_token)
+        application.logger.info("Got access token: {}".format(access_token))
 
         response = requests.get(
             "https://api.foursquare.com/v2/users/self",
