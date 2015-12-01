@@ -62,4 +62,4 @@ You checked in at {venue_name} on Foursquare but that location doesn't seem to e
         if user_email:
             send_email(user_email, "Your Recent Foursquare Checkin Isn't On OpenStreetMap", message)
     else:
-        logger.info("Matches: {}".format(', '.join(map(lambda i: i.get('tags').get('name'), potential_matches))))
+        logger.info(u"Matches: {}".format(u', '.join(map(lambda i: i.get('tags').get('name'), potential_matches))))
