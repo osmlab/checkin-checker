@@ -51,10 +51,14 @@ def foursquare_checkin_has_matches(checkin, user):
 
 You checked in at {venue_name} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it near http://osm.org/?zoom=17&mlat={mlat}&mlon={mlon}!
 
+To remind you where you went, here's a link to that Foursquare venue. Remember that you should not copy from external sources (like Foursquare) when editing.
+https://foursquare.com/v/{venue_id}
+
 -Checkin Checker
 (Reply to this e-mail for feedback/questions. Uninstall at https://foursquare.com/settings/connections to stop these e-mails.)""".format(
             name=user.get('firstName', 'Friend'),
             venue_name=venue_name,
+            venue_id=checkin['id'],
             mlat=round(venue.get('location').get('lat'), 6),
             mlon=round(venue.get('location').get('lng'), 6),
             email=user_email,
