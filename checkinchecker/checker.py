@@ -30,6 +30,10 @@ def foursquare_checkin_has_matches(checkin, user):
         logger.warn("This checkin didn't have a user email, so I didn't do anything")
         return
 
+    # Send emails for test pushes to me
+    if user.get('id') == 1:
+        user_email = 'ian@openstreetmap.us'
+
     query_parts = []
     for t in tags_to_check:
         for i in ('node', 'way', 'relation'):
