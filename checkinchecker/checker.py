@@ -18,9 +18,9 @@ def foursquare_checkin_has_matches(checkin, user):
             return
 
     query = '[out:json][timeout:5];(' \
-        'node["name"](around:100.0,{lat},{lng});' \
-        'way["name"](around:100.0,{lat},{lng});' \
-        'relation["name"](around:100.0,{lat},{lng});' \
+        'node["name"](around:500.0,{lat},{lng});' \
+        'way["name"](around:500.0,{lat},{lng});' \
+        'relation["name"](around:500.0,{lat},{lng});' \
         ');out body;'.format(
             lat=venue.get('location').get('lat'),
             lng=venue.get('location').get('lng'),
