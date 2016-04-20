@@ -25,6 +25,11 @@ def foursquare_checkin_has_matches(checkin, user):
             logger.info("Skipping checkin at private venue")
             return
 
+    user_email = user.get('contact', {}).get('email')
+    if not user_email:
+        logger.warn("This checkin didn't have a user email, so I didn't do anything")
+        return
+
     query_parts = []
     for t in tags_to_check:
         for i in ('node', 'way', 'relation'):
@@ -69,7 +74,6 @@ def foursquare_checkin_has_matches(checkin, user):
     most_likely_matches = filter(lambda p: p > 50, potential_matches)
 
     if not most_likely_matches:
-        user_email = user.get('contact', {}).get('email')
         logger.info("No matches! Send an e-mail.")
         message = u"""Hi {name},
 
@@ -91,9 +95,6 @@ https://foursquare.com/user/{user_id}/checkin/{checkin_id}
             mlon=round(venue.get('location').get('lng'), 6),
             email=user_email,
         )
-        if user_email:
-            send_email(user_email, "Your Recent Foursquare Checkin Isn't On OpenStreetMap", message)
-        else:
-            logger.warn("This checkin didn't have a user email, so I didn't do anything")
+        send_email(user_email, "Your Recent Foursquare Checkin Isn't On OpenStreetMap", message)
     else:
         logger.info(u"Matches: {}".format(u', '.join(map(lambda i: '{}/{}'.format(i['type'], i['id']), potential_matches))))
