@@ -1,4 +1,4 @@
-import editdistance
+from fuzzywuzzy import fuzz
 import requests
 import logging
 
@@ -73,17 +73,16 @@ def foursquare_checkin_has_matches(checkin, user):
             logger.warn("OSM object %s/%s matched but no name tags matched", osm_obj['type'], osm_obj['id'])
             return
 
-        distance = editdistance.eval(venue_name, osm_name)
-        edit_pct = float(distance) / len(venue_name)
+        distance = fuzz.partial_ratio(venue_name, osm_name)
 
         return distance
 
     # Attach match score to each element with a tuple
     potential_matches = [(match_amount(elem), elem) for elem in elements]
     # Sort the tuples based on their match score
-    potential_matches = sorted(potential_matches, key=lambda e: e[0])
+    potential_matches = sorted(potential_matches, key=lambda e: e[0], reverse=True)
     # Only pay attention to the tuples that are decent matches
-    potential_matches = filter(lambda p: p[0] < len(venue_name), potential_matches)
+    potential_matches = filter(lambda p: p[0] > 50, potential_matches)
 
     if not potential_matches:
         logger.info("No matches! Send an e-mail to %s", user_email)
@@ -113,7 +112,7 @@ https://foursquare.com/user/{user_id}/checkin/{checkin_id}
         logger.info(u"Matches: {}".format(u', '.join(map(lambda i: '{}/{} ({:0.2f})'.format(i[1]['type'], i[1]['id'], i[0]), potential_matches))))
         best_match_score, best_match = potential_matches[0]
 
-        if best_match_score < 4:
+        if best_match_score > 70:
             logger.info(u"A really great match found: %s/%s (%0.2f)", best_match['type'], best_match['id'], best_match_score)
 
             tags = best_match['tags']
