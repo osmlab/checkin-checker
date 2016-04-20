@@ -37,14 +37,16 @@ def foursquare_checkin_has_matches(checkin, user):
                 prim_type=i,
                 tag=t,
                 radius=radius_meters,
-                lat=venue.get('location').get('lat'),
-                lng=venue.get('location').get('lng'),
+                lat=round(venue.get('location').get('lat'), 6),
+                lng=round(venue.get('location').get('lng'), 6),
             )
             query_parts.append(query_part)
 
     query = '[out:json][timeout:5];({});out body;'.format(
             ''.join(query_parts),
         )
+
+    logger.info("Querying Overpass with: %s", query)
 
     response = requests.post('https://overpass-api.de/api/interpreter', data=query)
 
@@ -85,7 +87,7 @@ def foursquare_checkin_has_matches(checkin, user):
 You checked in at {venue_name} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it!
 
 In fact, here's a direct link to the area in your favorite editor:
-https://www.openstreetmap.org/edit?zoom=17&lat={mlat}&lon={mlon}
+https://www.openstreetmap.org/edit?zoom=19&lat={mlat}&lon={mlon}
 
 To remind you where you went, here's a link to your checkin. Remember that you should not copy from external sources (like Foursquare) when editing.
 https://foursquare.com/user/{user_id}/checkin/{checkin_id}
