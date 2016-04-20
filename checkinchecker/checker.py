@@ -93,5 +93,7 @@ https://foursquare.com/user/{user_id}/checkin/{checkin_id}
         )
         if user_email:
             send_email(user_email, "Your Recent Foursquare Checkin Isn't On OpenStreetMap", message)
+        else:
+            logger.warn("This checkin didn't have a user email, so I didn't do anything")
     else:
         logger.info(u"Matches: {}".format(u', '.join(map(lambda i: '{}/{}'.format(i['type'], i['id']), potential_matches))))
