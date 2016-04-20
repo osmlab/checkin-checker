@@ -31,7 +31,7 @@ def foursquare_checkin_has_matches(checkin, user):
         return
 
     # Send emails for test pushes to me
-    if user.get('id') == 1:
+    if user.get('id') == '1':
         user_email = 'ian@openstreetmap.us'
 
     query_parts = []
