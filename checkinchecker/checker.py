@@ -82,7 +82,7 @@ def foursquare_checkin_has_matches(checkin, user):
 
         message = u"""Hi {name},
 
-You checked in at {venue_name} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it near https://openstreetmap.org/?zoom=17&mlat={mlat}&mlon={mlon}!
+You checked in at {venue_name} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it!
 
 In fact, here's a direct link to the area in your favorite editor:
 https://www.openstreetmap.org/edit?zoom=17&lat={mlat}&lon={mlon}
