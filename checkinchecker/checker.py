@@ -73,7 +73,7 @@ def foursquare_checkin_has_matches(checkin, user):
     # Attach match score to each element with a tuple
     potential_matches = [(match_amount(elem), elem) for elem in elements]
     # Sort the tuples based on their match score
-    potential_matches = sorted(elements, key=lambda e: e[0])
+    potential_matches = sorted(potential_matches, key=lambda e: e[0])
     # Only pay attention to the tuples that are decent matches
     potential_matches = filter(lambda p: p[0] > 50, potential_matches)
 
