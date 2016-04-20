@@ -84,7 +84,7 @@ def foursquare_checkin_has_matches(checkin, user):
     potential_matches = filter(lambda p: p[0] > 50, potential_matches)
 
     if not potential_matches:
-        logger.info("No matches! Send an e-mail.")
+        logger.info("No matches! Send an e-mail to %s", user_email)
 
         message = u"""Hi {name},
 
