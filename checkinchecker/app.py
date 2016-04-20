@@ -50,7 +50,7 @@ def foursquare_auth_callback():
         )
         response.raise_for_status()
         access_token = response.json().get('access_token')
-        logger.info("Got access token: {}".format(access_token))
+        logger.info("Got access token for user")
 
         response = requests.get(
             "https://api.foursquare.com/v2/users/self",
@@ -70,6 +70,14 @@ def foursquare_auth_callback():
                     name=user_data.get('firstName'),
                 )
             send_email(email, "Welcome to Checkin Checker", message)
+
+        message = u"A new checkin-checker user from Foursquare just connected.\n\n" \
+            "Name: {name}\n" \
+            "Foursquare page: https://foursquare.com/user/{user_id}\n".format(
+                name=user_data.get('firstName'),
+                user_id=user_data.get('id'),
+            )
+        send_email('ian@openstreetmap.us', "New Checkin Checker User", message)
 
     return render_template('auth_callback_foursquare.html')
 
