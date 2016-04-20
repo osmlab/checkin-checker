@@ -77,7 +77,7 @@ def foursquare_checkin_has_matches(checkin, user):
     # Only pay attention to the tuples that are decent matches
     potential_matches = filter(lambda p: p[0] > 50, potential_matches)
 
-    if not most_likely_matches:
+    if not potential_matches:
         logger.info("No matches! Send an e-mail.")
 
         message = u"""Hi {name},
