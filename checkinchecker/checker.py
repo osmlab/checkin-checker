@@ -70,11 +70,16 @@ def foursquare_checkin_has_matches(checkin, user):
 
         return edit_pct
 
-    potential_matches = sorted(elements, key=match_amount)
-    most_likely_matches = filter(lambda p: p > 50, potential_matches)
+    # Attach match score to each element with a tuple
+    potential_matches = [(match_amount(elem), elem) for elem in elements]
+    # Sort the tuples based on their match score
+    potential_matches = sorted(elements, key=lambda e: e[0])
+    # Only pay attention to the tuples that are decent matches
+    potential_matches = filter(lambda p: p[0] > 50, potential_matches)
 
     if not most_likely_matches:
         logger.info("No matches! Send an e-mail.")
+
         message = u"""Hi {name},
 
 You checked in at {venue_name} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it near https://openstreetmap.org/?zoom=17&mlat={mlat}&mlon={mlon}!
@@ -97,4 +102,53 @@ https://foursquare.com/user/{user_id}/checkin/{checkin_id}
         )
         send_email(user_email, "Your Recent Foursquare Checkin Isn't On OpenStreetMap", message)
     else:
-        logger.info(u"Matches: {}".format(u', '.join(map(lambda i: '{}/{}'.format(i['type'], i['id']), potential_matches))))
+        logger.info(u"Matches: {}".format(u', '.join(map(lambda i: '{}/{} ({:0.2f})'.format(i[1]['type'], i[1]['id'], i[0]), potential_matches))))
+        best_match_score, best_match = potential_matches[0]
+
+        if best_match_score > 70:
+            logger.info(u"A really great match found: %s/%s (%0.2f)", best_match['type'], best_match['id'], best_match_score)
+
+            tags = best_match['tags']
+            questions = []
+            if 'addr:housenumber' in tags:
+                questions.append(" - Is the housenumber still '{}'?".format(tags['addr:housenumber']))
+            else:
+                questions.append(" - What is the housenumber?")
+            if 'addr:street' in tags:
+                questions.append(" - Is the venue still on '{}'?".format(tags['addr:street']))
+            else:
+                questions.append(" - What is the street name?")
+            if 'phone' in tags:
+                questions.append(" - Is the phone number still '{}'?".format(tags['phone']))
+            else:
+                questions.append(" - What is the phone number?")
+
+            message = u"""Hi {name},
+
+Your recent checkin to {venue_name} seems to match something in OpenStreetMap. While you're visiting this place, try collecting these missing attributes for OpenStreetMap:
+
+{questions}
+
+If you want, you can reply to this email and Ian will make these changes, or you can save your email as a draft/note for yourself later.
+
+If you'd like to edit the OSM object directly, use this edit link:
+https://www.openstreetmap.org/edit?{osm_type}={osm_id}
+
+To remind you where you went, here's a link to your checkin. Remember that you should not copy from external sources (like Foursquare) when editing.
+https://foursquare.com/user/{user_id}/checkin/{checkin_id}
+
+-Checkin Checker
+(Reply to this e-mail for feedback/questions. Uninstall at https://foursquare.com/settings/connections to stop these e-mails.)""".format(
+                name=user.get('firstName', 'Friend'),
+                venue_name=venue_name,
+                user_id=user['id'],
+                checkin_id=checkin['id'],
+                mlat=round(venue.get('location').get('lat'), 6),
+                mlon=round(venue.get('location').get('lng'), 6),
+                osm_type=best_match['type'],
+                osm_id=best_match['id'],
+                questions='\n'.join(questions),
+                email=user_email,
+            )
+
+            send_email(user_email, "Your Recent Foursquare Checkin Is On OpenStreetMap!", message)
