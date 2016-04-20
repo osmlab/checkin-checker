@@ -136,7 +136,7 @@ Your recent checkin to {venue_name} seems to match something in OpenStreetMap. W
 
 {questions}
 
-If you want, you can reply to this email and Ian will make these changes, or you can save your email as a draft/note for yourself later.
+If you want, you can reply to this email and Ian will make these changes, or you can save your email as a draft/note to yourself for later.
 
 If you'd like to edit the OSM object directly, use this edit link:
 https://www.openstreetmap.org/edit?{osm_type}={osm_id}
