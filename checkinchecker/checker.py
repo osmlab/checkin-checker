@@ -6,6 +6,14 @@ from util import send_email
 
 logger = logging.getLogger('checker')
 
+tags_to_check = [
+    'alt_name',
+    'loc_name',
+    'name',
+    'official_name',
+    'short_name',
+]
+radius_meters = 500.0
 
 def foursquare_checkin_has_matches(checkin, user):
     venue = checkin.get('venue')
@@ -17,13 +25,20 @@ def foursquare_checkin_has_matches(checkin, user):
             logger.info("Skipping checkin at private venue")
             return
 
-    query = '[out:json][timeout:5];(' \
-        'node["name"](around:500.0,{lat},{lng});' \
-        'way["name"](around:500.0,{lat},{lng});' \
-        'relation["name"](around:500.0,{lat},{lng});' \
-        ');out body;'.format(
-            lat=venue.get('location').get('lat'),
-            lng=venue.get('location').get('lng'),
+    query_parts = []
+    for t in tags_to_check:
+        for i in ('node', 'way', 'relation'):
+            query_part = '{prim_type}["{tag}"](around:{radius},{lat},{lng});'.format(
+                prim_type=i,
+                tag=t,
+                radius=radius_meters,
+                lat=venue.get('location').get('lat'),
+                lng=venue.get('location').get('lng'),
+            )
+            query_parts.append(query_part)
+
+    query = '[out:json][timeout:5];({});out body;'.format(
+            ''.join(query_parts),
         )
 
     response = requests.post('https://overpass-api.de/api/interpreter', data=query)
@@ -34,9 +49,19 @@ def foursquare_checkin_has_matches(checkin, user):
     elements = osm.get('elements')
 
     def is_match(osm_obj):
-        element_name = osm_obj.get('tags').get('name')
-        distance = editdistance.eval(venue_name, element_name)
-        edit_pct = (float(distance) / max(len(venue_name), len(element_name))) * 100.0
+        name = None
+        tags = osm_obj.get('tags')
+        for t in tags_to_check:
+            name = tags.get(t)
+            if name:
+                break
+
+        if not name:
+            logger.warn("OSM object %s/%s matched but no name tags matched", osm_obj['type'], osm_obj['id'])
+            return
+
+        distance = editdistance.eval(venue_name, name)
+        edit_pct = (float(distance) / max(len(venue_name), len(name))) * 100.0
 
         # print "{} -- {} ({:0.1f}%)".format(venue_name, element_name, edit_pct)
 
