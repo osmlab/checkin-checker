@@ -7,9 +7,9 @@ from util import send_email
 logger = logging.getLogger('checker')
 
 tags_to_check = [
+    'name',
     'alt_name',
     'loc_name',
-    'name',
     'official_name',
     'short_name',
 ]
@@ -48,33 +48,35 @@ def foursquare_checkin_has_matches(checkin, user):
     osm = response.json()
     elements = osm.get('elements')
 
-    def is_match(osm_obj):
-        name = None
+    def match_amount(osm_obj):
+        osm_name = None
         tags = osm_obj.get('tags')
         for t in tags_to_check:
-            name = tags.get(t)
-            if name:
+            osm_name = tags.get(t)
+            if osm_name:
                 break
 
-        if not name:
+        if not osm_name:
             logger.warn("OSM object %s/%s matched but no name tags matched", osm_obj['type'], osm_obj['id'])
             return
 
-        distance = editdistance.eval(venue_name, name)
-        edit_pct = (float(distance) / max(len(venue_name), len(name))) * 100.0
+        distance = editdistance.eval(venue_name, osm_name)
+        edit_pct = float(distance) / max(len(venue_name), len(osm_name))
 
-        # print "{} -- {} ({:0.1f}%)".format(venue_name, element_name, edit_pct)
+        return edit_pct
 
-        return edit_pct < 50
+    potential_matches = sorted(elements, key=match_amount)
+    most_likely_matches = filter(lambda p: p > 50, potential_matches)
 
-    potential_matches = filter(is_match, elements)
-
-    if not potential_matches:
+    if not most_likely_matches:
         user_email = user.get('contact', {}).get('email')
         logger.info("No matches! Send an e-mail.")
         message = u"""Hi {name},
 
-You checked in at {venue_name} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it near http://osm.org/?zoom=17&mlat={mlat}&mlon={mlon}!
+You checked in at {venue_name} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it near https://openstreetmap.org/?zoom=17&mlat={mlat}&mlon={mlon}!
+
+In fact, here's a direct link to the area in your favorite editor:
+https://www.openstreetmap.org/edit?zoom=17&lat={mlat}&lon={mlon}
 
 To remind you where you went, here's a link to your checkin. Remember that you should not copy from external sources (like Foursquare) when editing.
 https://foursquare.com/user/{user_id}/checkin/{checkin_id}
@@ -92,4 +94,4 @@ https://foursquare.com/user/{user_id}/checkin/{checkin_id}
         if user_email:
             send_email(user_email, "Your Recent Foursquare Checkin Isn't On OpenStreetMap", message)
     else:
-        logger.info(u"Matches: {}".format(u', '.join(map(lambda i: i.get('tags').get('name'), potential_matches))))
+        logger.info(u"Matches: {}".format(u', '.join(map(lambda i: '{}/{}'.format(i['type'], i['id']), potential_matches))))
