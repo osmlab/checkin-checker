@@ -82,7 +82,7 @@ def foursquare_checkin_has_matches(checkin, user):
     # Sort the tuples based on their match score
     potential_matches = sorted(potential_matches, key=lambda e: e[0], reverse=True)
     # Only pay attention to the tuples that are decent matches
-    potential_matches = filter(lambda p: p[0] > 50, potential_matches)
+    potential_matches = filter(lambda p: p[0] > 60, potential_matches)
 
     if not potential_matches:
         logger.info("No matches! Send an e-mail to %s", user_email)
@@ -112,7 +112,7 @@ https://foursquare.com/user/{user_id}/checkin/{checkin_id}
         logger.info(u"Matches: {}".format(u', '.join(map(lambda i: '{}/{} ({:0.2f})'.format(i[1]['type'], i[1]['id'], i[0]), potential_matches))))
         best_match_score, best_match = potential_matches[0]
 
-        if best_match_score > 70:
+        if best_match_score > 80:
             logger.info(u"A really great match found: %s/%s (%0.2f)", best_match['type'], best_match['id'], best_match_score)
 
             tags = best_match['tags']
