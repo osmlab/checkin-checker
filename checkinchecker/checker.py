@@ -13,8 +13,41 @@ tags_to_check = [
     'official_name',
     'short_name',
 ]
-radius_meters = 500.0
-query_timeout = 15
+default_overpass_radius = 500.0
+default_overpass_timeout = 15
+
+def build_overpass_query(lat, lon, radius=None, timeout=None):
+    radius = radius or default_overpass_radius
+    timeout = timeout or default_overpass_timeout
+
+    query_parts = []
+    for t in tags_to_check:
+        for i in ('node', 'way', 'relation'):
+            query_part = '{prim_type}["{tag}"](around:{radius},{lat},{lng});'.format(
+                prim_type=i,
+                tag=t,
+                radius=radius,
+                lat=round(lat, 6),
+                lng=round(lon, 6),
+            )
+            query_parts.append(query_part)
+
+    query = '[out:json][timeout:{}];({});out body;'.format(
+            timeout,
+            ''.join(query_parts),
+        )
+
+    return query
+
+def query_overpass(lat, lon, radius=None, timeout=None):
+    query = build_overpass_query(lat, lon, radius=radius, timeout=timeout)
+    logger.info("Querying Overpass with: %s", query)
+
+    response = requests.post('https://overpass-api.de/api/interpreter', data=query)
+
+    response.raise_for_status()
+
+    return response.json()
 
 def foursquare_checkin_has_matches(checkin, user):
     venue = checkin.get('venue')
@@ -35,31 +68,19 @@ def foursquare_checkin_has_matches(checkin, user):
     if user.get('id') == '1':
         user_email = 'ian@openstreetmap.us'
 
-    query_parts = []
-    for t in tags_to_check:
-        for i in ('node', 'way', 'relation'):
-            query_part = '{prim_type}["{tag}"](around:{radius},{lat},{lng});'.format(
-                prim_type=i,
-                tag=t,
-                radius=radius_meters,
-                lat=round(venue.get('location').get('lat'), 6),
-                lng=round(venue.get('location').get('lng'), 6),
-            )
-            query_parts.append(query_part)
+    overpass_results = query_overpass(
+        venue.get('location').get('lat'),
+        venue.get('location').get('lng'),
+        radius=default_overpass_radius,
+        timeout=default_overpass_timeout,
+    )
 
-    query = '[out:json][timeout:{}];({});out body;'.format(
-            query_timeout,
-            ''.join(query_parts),
-        )
+    overpass_remark = overpass_results.get('remark')
+    if overpass_remark and 'Query timed out' in overpass_remark:
+        logger.warn("Overpass query timed out: %s", overpass_remark)
+        return
 
-    logger.info("Querying Overpass with: %s", query)
-
-    response = requests.post('https://overpass-api.de/api/interpreter', data=query)
-
-    response.raise_for_status()
-
-    osm = response.json()
-    elements = osm.get('elements')
+    elements = overpass_results.get('elements')
 
     logger.info("Found %s things on Overpass", len(elements))
 
