@@ -14,6 +14,7 @@ tags_to_check = [
     'short_name',
 ]
 radius_meters = 500.0
+query_timeout = 15
 
 def foursquare_checkin_has_matches(checkin, user):
     venue = checkin.get('venue')
@@ -46,7 +47,8 @@ def foursquare_checkin_has_matches(checkin, user):
             )
             query_parts.append(query_part)
 
-    query = '[out:json][timeout:5];({});out body;'.format(
+    query = '[out:json][timeout:{}];({});out body;'.format(
+            query_timeout,
             ''.join(query_parts),
         )
 
