@@ -1,6 +1,7 @@
 from fuzzywuzzy import fuzz
 import requests
 import logging
+import os
 
 from util import send_email
 
@@ -13,8 +14,8 @@ tags_to_check = [
     'official_name',
     'short_name',
 ]
-default_overpass_radius = 500.0
-default_overpass_timeout = 15
+default_overpass_radius = float(os.environ.get('OVERPASS_DEFAULT_RADIUS', "500.0"))
+default_overpass_timeout = int(os.environ.get('OVERPASS_DEFAULT_TIMEOUT', "60"))
 
 def build_overpass_query(lat, lon, radius=None, timeout=None):
     radius = radius or default_overpass_radius
