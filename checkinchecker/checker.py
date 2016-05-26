@@ -17,31 +17,42 @@ tags_to_check = [
 default_overpass_radius = float(os.environ.get('OVERPASS_DEFAULT_RADIUS', "500.0"))
 default_overpass_timeout = int(os.environ.get('OVERPASS_DEFAULT_TIMEOUT', "60"))
 
-def build_overpass_query(lat, lon, radius=None, timeout=None):
+# Stuff to add to the Overpass query based on Foursquare category ID
+overrides_for_4sq_categories = {
+    '4f2a25ac4b909258e854f55f': {"extra": '["place"]'}, # Neighborhood
+    '4bf58dd8d48988d1ed931735': {"extra": '["aeroway"]', "radius": 1500.0}, # Airport
+    '4d954b06a243a5684965b473': {"extra": '["building"]'}, # Residential buildings (apartments/condos)
+    '4dfb90c6bd413dd705e8f897': {"extra": '["building"]'}, # Residential buildings (apartments/condos)
+    '4bf58dd8d48988d17e941735': {"extra": '["amenity"]'}, # Indie movie theater
+    '4bf58dd8d48988d1c4941735': {"extra": '["amenity"]'}, # Restaurant
+}
+
+def build_overpass_query(lat, lon, radius, query_extra=None, timeout=None):
     radius = radius or default_overpass_radius
     timeout = timeout or default_overpass_timeout
 
     query_parts = []
     for t in tags_to_check:
         for i in ('node', 'way', 'relation'):
-            query_part = '{prim_type}["{tag}"](around:{radius},{lat},{lng});'.format(
+            query_part = '{prim_type}["{tag}"]{query_extra}(around:{radius},{lat},{lng});\n'.format(
                 prim_type=i,
                 tag=t,
+                query_extra=query_extra if query_extra else "",
                 radius=radius,
                 lat=round(lat, 6),
                 lng=round(lon, 6),
             )
             query_parts.append(query_part)
 
-    query = '[out:json][timeout:{}];({});out body;'.format(
+    query = '[out:json][timeout:{}];(\n{});out body;'.format(
             timeout,
             ''.join(query_parts),
         )
 
     return query
 
-def query_overpass(lat, lon, radius=None, timeout=None):
-    query = build_overpass_query(lat, lon, radius=radius, timeout=timeout)
+def query_overpass(lat, lon, radius, query_extra=None, timeout=None):
+    query = build_overpass_query(lat, lon, radius, query_extra=query_extra, timeout=timeout)
     logger.info("Querying Overpass with: %s", query)
 
     response = requests.post('https://overpass-api.de/api/interpreter', data=query)
@@ -50,15 +61,47 @@ def query_overpass(lat, lon, radius=None, timeout=None):
 
     return response.json()
 
+def match_amount(venue_name, osm_obj):
+    osm_name = None
+    tags = osm_obj.get('tags')
+    for t in tags_to_check:
+        osm_name = tags.get(t)
+        if osm_name:
+            break
+
+    if not osm_name:
+        logger.warn("OSM object %s/%s matched but no name tags matched", osm_obj['type'], osm_obj['id'])
+        return
+
+    distance = fuzz.token_sort_ratio(venue_name, osm_name)
+
+    return distance
+
+def filter_matches(venue_name, overpass_elements):
+    # Attach match score to each element with a tuple
+    potential_matches = [(match_amount(venue_name, elem), elem) for elem in overpass_elements]
+    # Sort the tuples based on their match score
+    potential_matches = sorted(potential_matches, key=lambda e: e[0], reverse=True)
+    # Only pay attention to the tuples that are decent matches
+    potential_matches = filter(lambda p: p[0] > 50, potential_matches)
+
+    return potential_matches
+
 def foursquare_checkin_has_matches(checkin, user):
     venue = checkin.get('venue')
     venue_name = venue.get('name')
 
+    logger.info("Looking for matches with Foursquare venue '%s'", venue_name)
+
     categories = venue.get('categories')
+    primary_category = None
     for category in categories:
         if category.get('name').endswith('(private)'):
             logger.info("Skipping checkin at private venue")
             return
+
+        if category.get('primary'):
+            primary_category = category
 
     user_email = user.get('contact', {}).get('email')
     if not user_email:
@@ -69,10 +112,23 @@ def foursquare_checkin_has_matches(checkin, user):
     if user.get('id') == '1':
         user_email = 'ian@openstreetmap.us'
 
+    radius = default_overpass_radius
+
+    override = {}
+    if primary_category:
+        logger.info("Foursquare venue has primary category '%s' (%s)", primary_category['name'], primary_category['id'])
+        override = overrides_for_4sq_categories.get(primary_category['id'], {})
+        if override:
+            logger.info("Found Overpass override %s because the primary category is %s", override, primary_category.get('name'))
+
+            if override.get('radius'):
+                radius = override.get('radius')
+
     overpass_results = query_overpass(
         venue.get('location').get('lat'),
         venue.get('location').get('lng'),
-        radius=default_overpass_radius,
+        radius,
+        query_extra=override.get('extra'),
         timeout=default_overpass_timeout,
     )
 
@@ -85,28 +141,7 @@ def foursquare_checkin_has_matches(checkin, user):
 
     logger.info("Found %s things on Overpass", len(elements))
 
-    def match_amount(osm_obj):
-        osm_name = None
-        tags = osm_obj.get('tags')
-        for t in tags_to_check:
-            osm_name = tags.get(t)
-            if osm_name:
-                break
-
-        if not osm_name:
-            logger.warn("OSM object %s/%s matched but no name tags matched", osm_obj['type'], osm_obj['id'])
-            return
-
-        distance = fuzz.partial_ratio(venue_name, osm_name)
-
-        return distance
-
-    # Attach match score to each element with a tuple
-    potential_matches = [(match_amount(elem), elem) for elem in elements]
-    # Sort the tuples based on their match score
-    potential_matches = sorted(potential_matches, key=lambda e: e[0], reverse=True)
-    # Only pay attention to the tuples that are decent matches
-    potential_matches = filter(lambda p: p[0] > 60, potential_matches)
+    potential_matches = filter_matches(venue_name, elements)
 
     if not potential_matches:
         logger.info("No matches! Send an e-mail to %s", user_email)
