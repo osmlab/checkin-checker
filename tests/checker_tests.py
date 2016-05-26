@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from checkinchecker.checker import filter_matches
 from unittest import TestCase
 
@@ -42,13 +43,25 @@ class CheckerTests(TestCase):
 
     def test_match_filter_neighborhood(self):
         possibilities = [
-            {"id": 0, "tags": {"name": "Berean Baptist Church"}},
-            {"id": 0, "tags": {"name": "Church of Christ of Albina"}},
-            {"id": 0, "tags": {"name": "Community Church of God"}},
-            {"id": 1, "tags": {"name": "The Mason Williams"}},
+            {"id": 0, "tags": {"name": "Tanjong Pagar Plaza"}},
+            {"id": 0, "tags": {"name": "Tanjong Pagar Food Centre"}},
+            {"id": 0, "tags": {"name": "Tanjong Pagar Plaza"}},
+            {"id": 1, "tags": {"name": "Tanjong Pagar"}},
         ]
         venue_name = "Tanjong Pagar"
         matches = filter_matches(venue_name, possibilities)
 
-        self.assertEqual(1, len(matches))
+        self.assertEqual(4, len(matches))
         self.assertEqual(1, matches[0][1]['id'])
+
+    def test_match_filter_restaurant_no_match(self):
+        possibilities = [
+            {"id": 0, "tags": {"name": u"IJssalon"}},
+            {"id": 0, "tags": {"name": u"Pathé Schouwburgplein"}},
+            {"id": 0, "tags": {"name": u"Plaza"}},
+            {"id": 0, "tags": {"name": u"Indonesia Satebar"}},
+        ]
+        venue_name = u"Has Döner Kebab"
+        matches = filter_matches(venue_name, possibilities)
+
+        self.assertEqual(0, len(matches))
