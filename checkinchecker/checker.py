@@ -83,7 +83,7 @@ def filter_matches(venue_name, overpass_elements):
     # Sort the tuples based on their match score
     potential_matches = sorted(potential_matches, key=lambda e: e[0], reverse=True)
     # Only pay attention to the tuples that are decent matches
-    potential_matches = filter(lambda p: p[0] > 50, potential_matches)
+    potential_matches = filter(lambda p: p[0] > 60, potential_matches)
 
     return potential_matches
 
