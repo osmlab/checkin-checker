@@ -178,17 +178,17 @@ https://foursquare.com/user/{user_id}/checkin/{checkin_id}
             tags = best_match['tags']
             questions = []
             if 'addr:housenumber' in tags:
-                questions.append(" - Is the housenumber still '{}'?".format(tags['addr:housenumber']))
+                questions.append(u" - Is the housenumber still '{}'?".format(tags['addr:housenumber']))
             else:
-                questions.append(" - What is the housenumber?")
+                questions.append(u" - What is the housenumber?")
             if 'addr:street' in tags:
-                questions.append(" - Is the venue still on '{}'?".format(tags['addr:street']))
+                questions.append(u" - Is the venue still on '{}'?".format(tags['addr:street']))
             else:
-                questions.append(" - What is the street name?")
+                questions.append(u" - What is the street name?")
             if 'phone' in tags:
-                questions.append(" - Is the phone number still '{}'?".format(tags['phone']))
+                questions.append(u" - Is the phone number still '{}'?".format(tags['phone']))
             else:
-                questions.append(" - What is the phone number?")
+                questions.append(u" - What is the phone number?")
 
             message = u"""Hi {name},
 
