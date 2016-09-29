@@ -13,6 +13,7 @@ tags_to_check = [
     'loc_name',
     'official_name',
     'short_name',
+    'ref',
 ]
 default_overpass_radius = float(os.environ.get('OVERPASS_DEFAULT_RADIUS', "500.0"))
 default_overpass_timeout = int(os.environ.get('OVERPASS_DEFAULT_TIMEOUT', "60"))
