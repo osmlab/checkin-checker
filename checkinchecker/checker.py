@@ -17,7 +17,7 @@ tags_to_check = [
 ]
 default_overpass_radius = float(os.environ.get('OVERPASS_DEFAULT_RADIUS', "500.0"))
 default_overpass_timeout = int(os.environ.get('OVERPASS_DEFAULT_TIMEOUT', "60"))
-match_cutoff = int(os.environ.get('MATCH_CUTOFF', "80"))
+match_cutoff = int(os.environ.get('MATCH_CUTOFF', "60"))
 
 # Stuff to add to the Overpass query based on Foursquare category ID
 overrides_for_4sq_categories = {
