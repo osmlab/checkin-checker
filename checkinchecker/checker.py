@@ -17,6 +17,7 @@ tags_to_check = [
 ]
 default_overpass_radius = float(os.environ.get('OVERPASS_DEFAULT_RADIUS', "500.0"))
 default_overpass_timeout = int(os.environ.get('OVERPASS_DEFAULT_TIMEOUT', "60"))
+match_cutoff = int(os.environ.get('MATCH_CUTOFF', "80"))
 
 # Stuff to add to the Overpass query based on Foursquare category ID
 overrides_for_4sq_categories = {
@@ -84,7 +85,7 @@ def filter_matches(venue_name, overpass_elements):
     # Sort the tuples based on their match score
     potential_matches = sorted(potential_matches, key=lambda e: e[0], reverse=True)
     # Only pay attention to the tuples that are decent matches
-    potential_matches = filter(lambda p: p[0] > 60, potential_matches)
+    potential_matches = filter(lambda p: p[0] > match_cutoff, potential_matches)
 
     return potential_matches
 
@@ -172,25 +173,24 @@ https://foursquare.com/user/{user_id}/checkin/{checkin_id}
         logger.info(u"Matches: {}".format(u', '.join(map(lambda i: '{}/{} ({:0.2f})'.format(i[1]['type'], i[1]['id'], i[0]), potential_matches))))
         best_match_score, best_match = potential_matches[0]
 
-        if best_match_score > 80:
-            logger.info(u"A really great match found: %s/%s (%0.2f)", best_match['type'], best_match['id'], best_match_score)
+        logger.info(u"A really great match found: %s/%s (%0.2f)", best_match['type'], best_match['id'], best_match_score)
 
-            tags = best_match['tags']
-            questions = []
-            if 'addr:housenumber' in tags:
-                questions.append(u" - Is the housenumber still '{}'?".format(tags['addr:housenumber']))
-            else:
-                questions.append(u" - What is the housenumber?")
-            if 'addr:street' in tags:
-                questions.append(u" - Is the venue still on '{}'?".format(tags['addr:street']))
-            else:
-                questions.append(u" - What is the street name?")
-            if 'phone' in tags:
-                questions.append(u" - Is the phone number still '{}'?".format(tags['phone']))
-            else:
-                questions.append(u" - What is the phone number?")
+        tags = best_match['tags']
+        questions = []
+        if 'addr:housenumber' in tags:
+            questions.append(u" - Is the housenumber still '{}'?".format(tags['addr:housenumber']))
+        else:
+            questions.append(u" - What is the housenumber?")
+        if 'addr:street' in tags:
+            questions.append(u" - Is the venue still on '{}'?".format(tags['addr:street']))
+        else:
+            questions.append(u" - What is the street name?")
+        if 'phone' in tags:
+            questions.append(u" - Is the phone number still '{}'?".format(tags['phone']))
+        else:
+            questions.append(u" - What is the phone number?")
 
-            message = u"""Hi {name},
+        message = u"""Hi {name},
 
 Your recent checkin to {venue_name} seems to match something in OpenStreetMap. While you're visiting this place, try collecting these missing attributes for OpenStreetMap:
 
@@ -206,16 +206,16 @@ https://foursquare.com/user/{user_id}/checkin/{checkin_id}
 
 -Checkin Checker
 (Reply to this e-mail for feedback/questions. Uninstall at https://foursquare.com/settings/connections to stop these e-mails.)""".format(
-                name=user.get('firstName', 'Friend'),
-                venue_name=venue_name,
-                user_id=user['id'],
-                checkin_id=checkin['id'],
-                mlat=round(venue.get('location').get('lat'), 6),
-                mlon=round(venue.get('location').get('lng'), 6),
-                osm_type=best_match['type'],
-                osm_id=best_match['id'],
-                questions='\n'.join(questions),
-                email=user_email,
-            )
+            name=user.get('firstName', 'Friend'),
+            venue_name=venue_name,
+            user_id=user['id'],
+            checkin_id=checkin['id'],
+            mlat=round(venue.get('location').get('lat'), 6),
+            mlon=round(venue.get('location').get('lng'), 6),
+            osm_type=best_match['type'],
+            osm_id=best_match['id'],
+            questions='\n'.join(questions),
+            email=user_email,
+        )
 
-            send_email(user_email, "Your Recent Foursquare Checkin Is On OpenStreetMap!", message)
+        send_email(user_email, "Your Recent Foursquare Checkin Is On OpenStreetMap!", message)
