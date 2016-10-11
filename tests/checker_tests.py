@@ -65,3 +65,23 @@ class CheckerTests(TestCase):
         matches = filter_matches(venue_name, possibilities)
 
         self.assertEqual(0, len(matches))
+
+    def test_match_filter_waffle_shop(self):
+        possibilities = [
+            {"id": 0, "tags": {"name": u"Tariff Commission Building"}},
+            {"id": 0, "tags": {"name": u"Foo Bar"}},
+        ]
+        venue_name = u"Lincoln's Waffle Shop"
+        matches = filter_matches(venue_name, possibilities)
+
+        self.assertEqual(0, len(matches))
+
+    def test_match_filter_front_street(self):
+        possibilities = [
+            {"id": 0, "tags": {"name": u"Brown Street"}},
+            {"id": 0, "tags": {"name": u"Front Avenue"}},
+        ]
+        venue_name = u"Front Street"
+        matches = filter_matches(venue_name, possibilities)
+
+        self.assertEqual(0, len(matches))
