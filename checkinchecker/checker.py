@@ -27,6 +27,9 @@ overrides_for_4sq_categories = {
     '4dfb90c6bd413dd705e8f897': {"extra": '["building"]'}, # Residential buildings (apartments/condos)
     '4bf58dd8d48988d17e941735': {"extra": '["amenity"]'}, # Indie movie theater
     '4bf58dd8d48988d1c4941735': {"extra": '["amenity"]'}, # Restaurant
+    '4bf58dd8d48988d1f9941735': {"extra": '["amenity"]'}, # Food and Drink
+    '4bf58dd8d48988d1d1941735': {"extra": '["amenity"]'}, # Noodle House
+    '4bf58dd8d48988d110951735': {"extra": '["shop"]'}, # Salon / Barbershop
 }
 
 def build_overpass_query(lat, lon, radius, query_extra=None, timeout=None):
