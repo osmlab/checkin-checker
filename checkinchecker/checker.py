@@ -35,7 +35,7 @@ def build_overpass_query(lat, lon, radius, query_extra=None, timeout=None):
     query_parts = []
     for t in tags_to_check:
         for i in ('node', 'way', 'relation'):
-            query_part = '{prim_type}["{tag}"]{query_extra}(around:{radius},{lat},{lng});\n'.format(
+            query_part = '{prim_type}["{tag}"]{query_extra}(around:{radius},{lat},{lng});'.format(
                 prim_type=i,
                 tag=t,
                 query_extra=query_extra if query_extra else "",
