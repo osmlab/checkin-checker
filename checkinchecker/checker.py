@@ -9,6 +9,7 @@ logger = logging.getLogger('checker')
 
 tags_to_check = [
     'name',
+    'name:en',
     'alt_name',
     'loc_name',
     'official_name',
