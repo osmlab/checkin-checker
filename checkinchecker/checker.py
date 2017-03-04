@@ -1,5 +1,4 @@
 from fuzzywuzzy import fuzz
-from jinja2 import Environment, PackageLoader, select_autoescape
 import requests
 import logging
 import os
@@ -8,10 +7,6 @@ from util import send_email
 
 logger = logging.getLogger('checker')
 
-jinja_env = Environment(
-    loader=PackageLoader('checkinchecker', 'templates'),
-    autoescape=select_autoescape(['html', 'xml'])
-)
 
 tags_to_check = [
     'name',
@@ -100,6 +95,13 @@ def filter_matches(venue_name, overpass_elements):
     return potential_matches
 
 def foursquare_checkin_has_matches(checkin, user):
+    from jinja2 import Environment, PackageLoader, select_autoescape
+
+    jinja_env = Environment(
+        loader=PackageLoader('checkinchecker', 'templates'),
+        autoescape=select_autoescape(['html', 'xml'])
+    )
+
     venue = checkin.get('venue')
     venue_name = venue.get('name')
     venue_url = venue.get('url')
