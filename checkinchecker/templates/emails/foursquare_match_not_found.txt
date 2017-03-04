@@ -1,0 +1,17 @@
+Hi {{ name }},
+
+You checked in at {{ venue_name }} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it!
+
+In fact, here's a direct link to the area in your favorite editor:
+https://www.openstreetmap.org/edit?zoom=19&lat={{ mlat }}&lon={{ mlon }}
+{% if venue_url %}
+
+You can take a look at the place's website to get more information for editing OSM:
+{{ venue_url }}
+{% end %}
+
+To remind you where you went, here's a link to your checkin. Remember that you should not copy from external sources (like Foursquare) when editing.
+https://foursquare.com/user/{{ user_id }}/checkin/{{ checkin_id }}
+
+-Checkin Checker
+(Reply to this e-mail for feedback/questions. Uninstall at https://foursquare.com/settings/connections to stop these e-mails.)

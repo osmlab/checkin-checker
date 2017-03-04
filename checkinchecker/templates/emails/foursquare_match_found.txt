@@ -1,0 +1,21 @@
+Hi {{ name }},
+
+Your recent checkin to {{ venue_name }} seems to match something in OpenStreetMap. While you're visiting this place, try collecting these missing attributes for OpenStreetMap:
+
+{{ questions }}
+
+If you want, you can reply to this email and Ian will make these changes, or you can save your email as a draft/note to yourself for later.
+
+If you'd like to edit the OSM object directly, use this edit link:
+https://www.openstreetmap.org/edit?{{ osm_type }}={{ osm_id }}
+{% if venue_url %}
+
+You can take a look at the place's website to get more information for editing OSM:
+{{ venue_url }}
+{% end %}
+
+To remind you where you went, here's a link to your checkin. Remember that you should not copy from external sources (like Foursquare) when editing.
+https://foursquare.com/user/{{ user_id }}/checkin/{{ checkin_id }}
+
+-Checkin Checker
+(Reply to this e-mail for feedback/questions. Uninstall at https://foursquare.com/settings/connections to stop these e-mails.)

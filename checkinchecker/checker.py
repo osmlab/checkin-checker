@@ -1,4 +1,5 @@
 from fuzzywuzzy import fuzz
+from jinja2 import Environment, PackageLoader, select_autoescape
 import requests
 import logging
 import os
@@ -6,6 +7,11 @@ import os
 from util import send_email
 
 logger = logging.getLogger('checker')
+
+jinja_env = Environment(
+    loader=PackageLoader('checkinchecker', 'templates'),
+    autoescape=select_autoescape(['html', 'xml'])
+)
 
 tags_to_check = [
     'name',
@@ -96,6 +102,7 @@ def filter_matches(venue_name, overpass_elements):
 def foursquare_checkin_has_matches(checkin, user):
     venue = checkin.get('venue')
     venue_name = venue.get('name')
+    venue_url = venue.get('url')
 
     logger.info("Looking for matches with Foursquare venue '%s'", venue_name)
 
@@ -152,20 +159,11 @@ def foursquare_checkin_has_matches(checkin, user):
     if not potential_matches:
         logger.info("No matches! Send an e-mail to %s", user_email)
 
-        message = u"""Hi {name},
-
-You checked in at {venue_name} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it!
-
-In fact, here's a direct link to the area in your favorite editor:
-https://www.openstreetmap.org/edit?zoom=19&lat={mlat}&lon={mlon}
-
-To remind you where you went, here's a link to your checkin. Remember that you should not copy from external sources (like Foursquare) when editing.
-https://foursquare.com/user/{user_id}/checkin/{checkin_id}
-
--Checkin Checker
-(Reply to this e-mail for feedback/questions. Uninstall at https://foursquare.com/settings/connections to stop these e-mails.)""".format(
+        templ = jinja_env.get_template('emails/foursquare_match_not_found.txt')
+        message = templ.render(
             name=user.get('firstName', 'Friend'),
             venue_name=venue_name,
+            venue_url=venue_url,
             user_id=user['id'],
             checkin_id=checkin['id'],
             mlat=round(venue.get('location').get('lat'), 6),
@@ -194,24 +192,11 @@ https://foursquare.com/user/{user_id}/checkin/{checkin_id}
         else:
             questions.append(u" - What is the phone number?")
 
-        message = u"""Hi {name},
-
-Your recent checkin to {venue_name} seems to match something in OpenStreetMap. While you're visiting this place, try collecting these missing attributes for OpenStreetMap:
-
-{questions}
-
-If you want, you can reply to this email and Ian will make these changes, or you can save your email as a draft/note to yourself for later.
-
-If you'd like to edit the OSM object directly, use this edit link:
-https://www.openstreetmap.org/edit?{osm_type}={osm_id}
-
-To remind you where you went, here's a link to your checkin. Remember that you should not copy from external sources (like Foursquare) when editing.
-https://foursquare.com/user/{user_id}/checkin/{checkin_id}
-
--Checkin Checker
-(Reply to this e-mail for feedback/questions. Uninstall at https://foursquare.com/settings/connections to stop these e-mails.)""".format(
+        templ = jinja_env.get_template('emails/foursquare_match_found.txt')
+        message = templ.render(
             name=user.get('firstName', 'Friend'),
             venue_name=venue_name,
+            venue_url=venue_url,
             user_id=user['id'],
             checkin_id=checkin['id'],
             mlat=round(venue.get('location').get('lat'), 6),
