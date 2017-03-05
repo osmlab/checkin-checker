@@ -8,7 +8,7 @@ https://www.openstreetmap.org/edit?zoom=19&lat={{ mlat }}&lon={{ mlon }}
 
 You can take a look at the place's website to get more information for editing OSM:
 {{ venue_url }}
-{% end %}
+{% endif %}
 
 To remind you where you went, here's a link to your checkin. Remember that you should not copy from external sources (like Foursquare) when editing.
 https://foursquare.com/user/{{ user_id }}/checkin/{{ checkin_id }}
