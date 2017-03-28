@@ -4,6 +4,7 @@ import logging
 import os
 
 from util import send_email
+from worker import conn
 
 logger = logging.getLogger('checker')
 
@@ -105,6 +106,14 @@ def foursquare_checkin_has_matches(checkin, user):
     venue = checkin.get('venue')
     venue_name = venue.get('name')
     venue_url = venue.get('url')
+    venue_id = venue.get('id')
+    user_id = user.get('id')
+
+    venue_user_key = 'checkin{}{}'.format(user_id, venue_id)
+    if conn.getset(venue_user_key, True):
+        logger.info("Skipping this checkin because uid %s has already checked in to %s",
+                    user_id, venue_id)
+        return
 
     logger.info("Looking for matches with Foursquare venue '%s'", venue_name)
 
