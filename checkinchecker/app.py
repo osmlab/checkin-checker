@@ -29,7 +29,7 @@ setup_loghandlers()
 
 @application.route('/')
 def index():
-    callback_url = 'https://checkin-checker.herokuapp.com/auth/callback/foursquare'
+    callback_url = 'https://checkin-checker.dev.openstreetmap.us/auth/callback/foursquare'
     return render_template('index.html', callback_url=callback_url)
 
 
@@ -44,7 +44,7 @@ def foursquare_auth_callback():
                 client_id=FOURSQUARE_CLIENT_ID,
                 client_secret=FOURSQUARE_CLIENT_SECRET,
                 grant_type='authorization_code',
-                redirect_uri='https://checkin-checker.herokuapp.com/auth/callback/foursquare',
+                redirect_uri='https://checkin-checker.dev.openstreetmap.us/auth/callback/foursquare',
                 code=code,
             )
         )
@@ -64,7 +64,7 @@ def foursquare_auth_callback():
         email = user_data.get('contact', {}).get('email')
         if email:
             message = u"Hi {name},\n\n" \
-                "You just connected your Foursquare account to Checkin Checker at https://checkin-checker.herokuapp.com. " \
+                "You just connected your Foursquare account to Checkin Checker at https://checkin-checker.dev.openstreetmap.us. " \
                 "If you ever want to disconnet, go to https://foursquare.com/settings/connections and remove the Checkin Checker app.\n\n" \
                 "Checkin Checker".format(
                     name=user_data.get('firstName'),
