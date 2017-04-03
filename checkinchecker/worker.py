@@ -12,4 +12,4 @@ if __name__ == '__main__':
     setup_loghandlers()
     with Connection(conn):
         worker = Worker(map(Queue, listen))
-        worker.work(burst=True)
+        worker.work()
