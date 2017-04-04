@@ -18,7 +18,6 @@ def setup_loghandlers(level='INFO'):
 def send_email(to, subject, body):
     logger = logging.getLogger('checker')
 
-    logger.info("Send email '%s' to %s", subject, to)
     response = requests.post(
         'https://api.mailgun.net/v3/{}/messages'.format(os.environ.get('MAILGUN_API_DOMAIN')),
         auth=('api', os.environ.get('MAILGUN_API_KEY')),
