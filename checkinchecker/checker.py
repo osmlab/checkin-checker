@@ -61,7 +61,7 @@ def build_overpass_query(lat, lon, radius, query_extra=None, timeout=None):
 
 def query_overpass(lat, lon, radius, query_extra=None, timeout=None):
     query = build_overpass_query(lat, lon, radius, query_extra=query_extra, timeout=timeout)
-    logger.info("Querying Overpass with: %s", query)
+    logger.info("Querying Overpass around %s,%s", lat, lon)
 
     response = requests.post('https://overpass-api.de/api/interpreter', data=query)
 
