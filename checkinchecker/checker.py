@@ -33,6 +33,7 @@ overrides_for_4sq_categories = {
     '4bf58dd8d48988d1f9941735': {"extra": '["amenity"]'}, # Food and Drink
     '4bf58dd8d48988d1d1941735': {"extra": '["amenity"]'}, # Noodle House
     '4bf58dd8d48988d110951735': {"extra": '["shop"]'}, # Salon / Barbershop
+    '4bf58dd8d48988d163941735': {"extra": '["leisure"]'}, # Park
 }
 
 def build_overpass_query(lat, lon, radius, query_extra=None, timeout=None):
