@@ -1,3 +1,5 @@
 language: python
-install: pipenv install
+install:
+  - pip install pipenv
+  - pipenv install --dev
 script: nosetests
