@@ -110,6 +110,10 @@ def foursquare_checkin_has_matches(checkin, user):
     venue_id = venue.get('id')
     user_id = user.get('id')
 
+    if venue.get('private'):
+        logger.info("Skipping checkin for private venue")
+        return
+
     venue_user_key = 'checkin{}{}'.format(user_id, venue_id)
     if conn.getset(venue_user_key, True):
         logger.info("Skipping this checkin because uid %s has already checked in to %s",
@@ -121,12 +125,9 @@ def foursquare_checkin_has_matches(checkin, user):
     categories = venue.get('categories')
     primary_category = None
     for category in categories:
-        if category.get('name').endswith('(private)'):
-            logger.info("Skipping checkin at private venue")
-            return
-
         if category.get('primary'):
             primary_category = category
+            break
 
     user_email = user.get('contact', {}).get('email')
     if not user_email:
@@ -169,7 +170,7 @@ def foursquare_checkin_has_matches(checkin, user):
     potential_matches = filter_matches(venue_name, elements)
 
     if not potential_matches:
-        logger.info("No matches! Send an e-mail to %s", user_email)
+        logger.info("No matches found!")
 
         templ = jinja_env.get_template('emails/foursquare_match_not_found.txt')
         message = templ.render(
