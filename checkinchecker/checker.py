@@ -3,8 +3,8 @@ import requests
 import logging
 import os
 
-from util import send_email
-from worker import conn
+from checkinchecker.util import send_email
+from checkinchecker.worker import conn
 
 logger = logging.getLogger('checker')
 

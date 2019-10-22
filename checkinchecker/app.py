@@ -4,9 +4,9 @@ import requests
 from flask import Flask, request, render_template, json
 from rq import Queue
 
-from worker import conn
-from util import send_email, setup_loghandlers
-from checker import foursquare_checkin_has_matches
+from checkinchecker.worker import conn
+from checkinchecker.util import send_email, setup_loghandlers
+from checkinchecker.checker import foursquare_checkin_has_matches
 
 
 # configuration
