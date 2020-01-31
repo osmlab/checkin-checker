@@ -94,7 +94,7 @@ def filter_matches(venue_name, overpass_elements):
     # Only pay attention to the tuples that are decent matches
     potential_matches = filter(lambda p: p[0] > match_cutoff, potential_matches)
 
-    return potential_matches
+    return list(potential_matches)
 
 def foursquare_checkin_has_matches(checkin, user):
     from jinja2 import Environment, PackageLoader, select_autoescape
