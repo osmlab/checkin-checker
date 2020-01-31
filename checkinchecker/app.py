@@ -87,7 +87,7 @@ def foursquare_webhook():
     checkin = json.loads(request.form.get('checkin'))
     user = json.loads(request.form.get('user'))
     q.enqueue(foursquare_checkin_has_matches, checkin, user)
-    logger.info('Enqueued a webhook from a user')
+    logger.info('Enqueued a webhook from a user: checkin %s user %s', request.form.get('checkin'), request.form.get('user'))
     return 'OK'
 
 if __name__ == '__main__':
