@@ -115,8 +115,8 @@ def foursquare_checkin_has_matches(checkin, user):
         return
 
     venue_user_key = 'checkin{}{}'.format(user_id, venue_id)
-    if conn.getset(venue_user_key, True):
-        logger.info("Skipping this checkin because uid %s has already checked in to %s",
+    if conn.exists(venue_user_key):
+        logger.info("Skipping this checkin because uid %s has already checked in to %s recently",
                     user_id, venue_id)
         return
 
@@ -221,3 +221,6 @@ def foursquare_checkin_has_matches(checkin, user):
         )
 
         send_email(user_email, "Your Recent Foursquare Checkin Is On OpenStreetMap!", message)
+
+    # Don't send another email for this user/venue combination for 7 days
+    conn.setex(venue_user_key, 7 * 24 * 60 * 60, 1)
