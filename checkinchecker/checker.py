@@ -114,7 +114,7 @@ def foursquare_checkin_has_matches(checkin, user):
         logger.info("Skipping checkin for private venue")
         return
 
-    venue_user_key = 'checkin{}{}'.format(user_id, venue_id)
+    venue_user_key = 'checkin:{}:{}'.format(user_id, venue_id)
     if conn.exists(venue_user_key):
         logger.info("Skipping this checkin because uid %s has already checked in to %s recently",
                     user_id, venue_id)
