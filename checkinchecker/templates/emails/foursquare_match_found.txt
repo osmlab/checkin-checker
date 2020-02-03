@@ -7,7 +7,8 @@ Your recent checkin to {{ venue_name }} seems to match something in OpenStreetMa
 If you want, you can reply to this email and Ian will make these changes, or you can save your email as a draft/note to yourself for later.
 
 If you'd like to edit the OSM object directly, use this edit link:
-https://www.openstreetmap.org/edit?{{ osm_type }}={{ osm_id }}
+
+https://poism.dev.openstreetmap.us/edit/{{ osm_type }}/{{ osm_id }}
 {% if venue_url %}
 
 You can take a look at the place's website to get more information for editing OSM:
