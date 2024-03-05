@@ -2,8 +2,8 @@ Hi {{ name }},
 
 You checked in at {{ venue_name }} on Foursquare but that location doesn't seem to exist in OpenStreetMap. You should consider adding it!
 
-In fact, here's a direct link to the area in your favorite editor:
-https://www.openstreetmap.org/edit?zoom=19&lat={{ mlat }}&lon={{ mlon }}
+In fact, here's a direct link to add the place to OSM using an in-browser editor:
+https://poism.dev.openstreetmap.us/add?lat={{ mlat }}&lon={{ mlon }}
 {% if venue_url %}
 
 You can take a look at the place's website to get more information for editing OSM:
